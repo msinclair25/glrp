@@ -46,6 +46,8 @@ Do these in order. Use the scripts next to this file (`scripts/`).
    If `close_unit.py` prints `KEEP GOING`, do that next unit **now** — go back to step 4. Do not stop and wait for a new chat. Stop only when the check fails or every product number is closed.
 7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
+Grok Build: a Stop hook kicks **once** if you try to end the turn with product steps left. Hermes cannot do that.
+
 ## Pitfalls
 
 - Never put “do not implement yet” in `UNIT.md`. The next session will obey it and stall.

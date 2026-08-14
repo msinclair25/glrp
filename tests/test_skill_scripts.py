@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -170,6 +171,50 @@ class TestCloseUnit(unittest.TestCase):
             self.assertEqual(proc.returncode, 10)
             progress = (root / ".glrp" / "progress.txt").read_text(encoding="utf-8")
             self.assertIn("no-op", progress)
+
+
+class TestStopGate(unittest.TestCase):
+    def _run(self, root: Path, payload: dict) -> subprocess.CompletedProcess[str]:
+        env = os.environ.copy()
+        env["GROK_WORKSPACE_ROOT"] = str(root)
+        return subprocess.run(
+            [sys.executable, str(SCRIPTS / "stop_gate.py")],
+            input=json.dumps(payload),
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+
+    def test_kicks_once_when_steps_remain(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            git_init(root)
+            self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
+            (root / ".glrp" / "GOAL.md").write_text("# Goal\n1. person\n2. charge\n", encoding="utf-8")
+            proc = self._run(root, {"reason": "end_turn", "stopHookActive": False})
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            data = json.loads(proc.stdout)
+            self.assertEqual(data["decision"], "block")
+            self.assertIn("1. person", data["reason"])
+
+    def test_allows_after_one_kick(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            git_init(root)
+            self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
+            (root / ".glrp" / "GOAL.md").write_text("# Goal\n1. person\n", encoding="utf-8")
+            proc = self._run(root, {"reason": "end_turn", "stopHookActive": True})
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertEqual(proc.stdout.strip(), "")
+
+    def test_allows_when_nothing_left(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            git_init(root)
+            self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
+            proc = self._run(root, {"reason": "end_turn"})
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertEqual(proc.stdout.strip(), "")
 
 
 if __name__ == "__main__":

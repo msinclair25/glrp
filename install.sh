@@ -23,6 +23,9 @@ install_one() {
 found=0
 if [[ -d "${GROK_HOME:-$HOME/.grok}" ]]; then
   install_one "${GROK_HOME:-$HOME/.grok}/skills/glrp" "$SRC/grok/SKILL.md"
+  mkdir -p "${GROK_HOME:-$HOME/.grok}/hooks"
+  cp "$SRC/grok/hooks/glrp-stop.json" "${GROK_HOME:-$HOME/.grok}/hooks/glrp-stop.json"
+  echo "Installed hook: ${GROK_HOME:-$HOME/.grok}/hooks/glrp-stop.json"
   found=1
 fi
 if [[ -d "${HERMES_HOME:-$HOME/.hermes}" ]]; then

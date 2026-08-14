@@ -1,7 +1,7 @@
 ---
 name: glrp
 description: Keep Grok on one coding unit with a check.
-version: 0.1.4
+version: 0.1.5
 author: Morgan Sinclair (msinclair25), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]

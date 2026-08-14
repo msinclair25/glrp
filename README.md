@@ -49,7 +49,7 @@ git clone https://github.com/msinclair25/glrp.git
 bash glrp/install.sh
 ```
 
-Puts the skill in `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those folders exist. Start a **new session** so it loads.
+Puts the skill in `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those folders exist. On Grok Build it also installs a Stop hook that kicks once if the model quits with steps left. Start a **new session** so it loads.
 
 ## Use
 

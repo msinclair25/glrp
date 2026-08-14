@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.grok/skills/glrp/scripts/stop_gate.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
