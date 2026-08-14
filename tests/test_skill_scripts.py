@@ -142,6 +142,23 @@ class TestCloseUnit(unittest.TestCase):
             self.assertIn("2. charge", progress)
             self.assertIn("3. list", progress)
 
+    def test_tells_keep_going_when_goal_has_more(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            git_init(root)
+            self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
+            (root / ".glrp" / "config.toml").write_text('verify = "true"\n', encoding="utf-8")
+            (root / ".glrp" / "GOAL.md").write_text(
+                "# Goal\n1. person\n2. charge\n3. list\n",
+                encoding="utf-8",
+            )
+            (root / ".glrp" / "UNIT.md").write_text("# Current unit\n1. person\n", encoding="utf-8")
+            proc = run_script("close_unit.py", "--cwd", str(root))
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn("KEEP GOING", proc.stdout)
+            self.assertIn("2. charge", proc.stdout)
+            self.assertIn("2 product steps left", proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

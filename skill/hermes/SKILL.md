@@ -1,7 +1,7 @@
 ---
 name: glrp
 description: Keep Grok on one coding unit with a check.
-version: 0.1.2
+version: 0.1.3
 author: Morgan Sinclair (msinclair25), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -34,19 +34,21 @@ Do these in order. Scripts live beside this file (`scripts/`). If installed to `
    Set `verify` to a command that can fail **for this unit**.
 3. **Re-anchor (every session, first).**  
    `terminal(command="python3 scripts/next.py --cwd \"$(git rev-parse --show-toplevel)\"")`
-4. **One unit.** `UNIT.md` is work to do **now**. Never write “do not implement yet.”
+4. **One unit at a time.** `UNIT.md` is work to do **now**. Never write “do not implement yet.” Do not dump the whole GOAL in one edit.
 5. **Check.**  
    `terminal(command="python3 scripts/check.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
    If `verify` still points at a previous slice, change it. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `terminal(command="python3 scripts/close_unit.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Immediately set `UNIT.md` to the lowest product GOAL number not yet in progress.txt. If this sitting finished several numbers, list all of them before close. If UNIT is already implemented, close and advance. Do-not-build is never a unit.
+   Immediately set `UNIT.md` to the lowest product GOAL number not yet in progress.txt. If this sitting finished several numbers, list all of them before close. If UNIT is already implemented, close and advance. Do-not-build is never a unit.  
+   If `close_unit.py` prints `KEEP GOING`, do that next unit **now**. Do not stop and wait for a new chat.
 7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls
 
 - Never put “do not implement yet” in `UNIT.md`.
 - A sitting that ships 1–3 must close 1, 2, and 3.
+- After a green close, do the next number now.
 - Do-not-build is not a unit.
 - `verify = "true"` never fails for this unit.
 - Do not rewrite `GOAL.md` to match what you built.

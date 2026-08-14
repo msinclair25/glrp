@@ -36,19 +36,21 @@ Do these in order. Use the scripts next to this file (`scripts/`).
 3. **Re-anchor (every session, first).**  
    `python3 scripts/next.py --cwd "$(git rev-parse --show-toplevel)"`  
    Read that output before any other project file.
-4. **One unit.** `.glrp/UNIT.md` is work to do **now**. Never write “do not implement yet” (that sabotages the next session). Touch only what this unit needs.
+4. **One unit at a time.** `.glrp/UNIT.md` is work to do **now**. Never write “do not implement yet” (that sabotages the next session). Touch only what this unit needs. Do not dump the whole GOAL in one edit.
 5. **Check.** After edits:  
    `python3 scripts/check.py --cwd "$(git rev-parse --show-toplevel)"`  
    If `verify` still points at a **previous** slice, change it so this unit can fail. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `python3 scripts/close_unit.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Immediately set `UNIT.md` to the lowest **product** GOAL number not yet in `progress.txt` (cite the number). If this sitting finished several numbers, list all of them in `UNIT.md` before close. If UNIT is already implemented, close it and advance. Never make a do-not-build line the current unit. “all units closed” only when every **product** number is in `progress.txt`.
+   Immediately set `UNIT.md` to the lowest **product** GOAL number not yet in `progress.txt` (cite the number). If this sitting finished several numbers, list all of them in `UNIT.md` before close. If UNIT is already implemented, close it and advance. Never make a do-not-build line the current unit. “all units closed” only when every **product** number is in `progress.txt`.  
+   If `close_unit.py` prints `KEEP GOING`, do that next unit **now** — go back to step 4. Do not stop and wait for a new chat. Stop only when the check fails or every product number is closed.
 7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls
 
 - Never put “do not implement yet” in `UNIT.md`. The next session will obey it and stall.
 - A sitting that ships 1–3 must close 1, 2, and 3. Closing only “1” makes the next session rewind.
+- After a green close, do the next number now. Do not stop and wait for a new chat.
 - Do-not-build is not a unit. Don’t sit on “don’t build Venmo.”
 - `verify = "true"` never fails — accuracy will not improve until the check can fail for **this** unit.
 - Do not rewrite `.glrp/GOAL.md` to match what you built.

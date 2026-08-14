@@ -9,7 +9,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check import append_progress, run_check  # noqa: E402
-from glrp_lib import GLRP_DIR, assert_safe, resolve_root  # noqa: E402
+from glrp_lib import (  # noqa: E402
+    GLRP_DIR,
+    assert_safe,
+    remaining_product_lines,
+    resolve_root,
+)
 
 
 def unit_summaries(root: Path) -> list[str]:
@@ -47,6 +52,13 @@ def main() -> None:
     for summary in unit_summaries(root):
         append_progress(root, f"closed unit: {summary}")
     print("Unit closed.")
+    leftover = remaining_product_lines(root)
+    if leftover:
+        print("KEEP GOING — do the next unit now:")
+        print(leftover[0])
+        print(f"({len(leftover)} product steps left)")
+    else:
+        print("All product steps closed.")
 
 
 if __name__ == "__main__":

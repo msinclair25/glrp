@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+_NUM_LINE = re.compile(r"^(\d+)\.\s+\S")
 
 GLRP_DIR = ".glrp"
 FILES = ("GOAL.md", "UNIT.md", "progress.txt", "config.toml")
@@ -61,6 +64,36 @@ def assert_safe(root: Path, how: str, allow_non_git: bool) -> None:
             file=sys.stderr,
         )
         raise SystemExit(2)
+
+
+def numbered_product_lines(goal: str) -> list[str]:
+    return [line.strip() for line in goal.splitlines() if _NUM_LINE.match(line.strip())]
+
+
+def closed_numbers(progress: str) -> set[str]:
+    found: set[str] = set()
+    for line in progress.splitlines():
+        if "closed unit:" not in line.lower():
+            continue
+        match = re.search(r"(\d+)\.", line)
+        if match:
+            found.add(match.group(1))
+    return found
+
+
+def remaining_product_lines(root: Path) -> list[str]:
+    d = root / GLRP_DIR
+    goal = (d / "GOAL.md").read_text(encoding="utf-8") if (d / "GOAL.md").exists() else ""
+    progress = (
+        (d / "progress.txt").read_text(encoding="utf-8") if (d / "progress.txt").exists() else ""
+    )
+    done = closed_numbers(progress)
+    remaining: list[str] = []
+    for line in numbered_product_lines(goal):
+        number = line.split(".", 1)[0]
+        if number not in done:
+            remaining.append(line)
+    return remaining
 
 
 def glrp_dir(root: Path) -> Path:
