@@ -81,7 +81,7 @@ def social() -> Path:
     draw.text((68, 128), "GLRP", font=title, fill=INK)
     draw.text(
         (74, 300),
-        "Stay on the unit.",
+        "Pick up where you left off.",
         font=sub,
         fill=TEAL,
     )
@@ -104,7 +104,7 @@ def banner() -> Path:
     img, draw = base(w, h)
     draw.text((96, 90), "FOR GROK BUILD AND HERMES", font=font(F_SANS, 28), fill=AMBER)
     draw.text((88, 150), "GLRP", font=font(F_DISPLAY, 180), fill=INK)
-    draw.text((100, 380), "Stay on the unit.", font=font(F_SERIF, 52), fill=TEAL)
+    draw.text((100, 380), "Pick up where you left off.", font=font(F_SERIF, 52), fill=TEAL)
     draw.text(
         (100, 460),
         "Number the work. Do one sitting. Run a check that can fail.\nClose it. The next session already knows what’s next.",
