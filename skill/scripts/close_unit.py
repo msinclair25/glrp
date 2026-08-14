@@ -12,13 +12,26 @@ from check import append_progress, run_check  # noqa: E402
 from glrp_lib import GLRP_DIR, assert_safe, resolve_root  # noqa: E402
 
 
-def unit_summary(root: Path) -> str:
+def unit_summaries(root: Path) -> list[str]:
+    """Every numbered GOAL line in UNIT.md, else the first body line.
+
+    A sitting that shipped 1–3 must list those numbers so progress records
+    all of them. Recording only the first line made the next session rewind.
+    """
     text = (root / GLRP_DIR / "UNIT.md").read_text(encoding="utf-8")
+    numbered: list[str] = []
+    fallback = ""
     for line in text.splitlines():
         line = line.strip()
-        if line and not line.startswith("#"):
-            return line
-    return "(empty UNIT.md)"
+        if not line or line.startswith("#"):
+            continue
+        if line[:1].isdigit() and "." in line[:4]:
+            numbered.append(line)
+        elif not fallback:
+            fallback = line
+    if numbered:
+        return numbered
+    return [fallback or "(empty UNIT.md)"]
 
 
 def main() -> None:
@@ -31,7 +44,8 @@ def main() -> None:
     if code != 0:
         print("check failed — unit not closed", file=sys.stderr)
         raise SystemExit(10)
-    append_progress(root, f"closed unit: {unit_summary(root)}")
+    for summary in unit_summaries(root):
+        append_progress(root, f"closed unit: {summary}")
     print("Unit closed.")
 
 
