@@ -58,8 +58,8 @@ In a git project:
 1. Say `activate glrp` or `/glrp`.
 2. Set `verify = "pytest -q"` (or whatever actually tests your project).
 3. Paste the brief. It numbers the plan and starts step one.
-4. It does that step, runs the test, writes the next step.
-5. Next chat: it reads the file and continues.
+4. It does that step, runs the test, writes the next step, and **keeps going** this sitting.
+5. If you start a new chat, it reads the file and continues.
 
 ```
 skill/scripts/   activate.py  next.py  check.py  close_unit.py
