@@ -77,23 +77,23 @@ def social() -> Path:
     kicker = font(F_SANS, 22)
     title = font(F_DISPLAY, 132)
     sub = font(F_SERIF, 36)
-    draw.text((72, 78), "GROK  ·  HERMES  ·  AGENTIC CODING", font=kicker, fill=AMBER)
+    draw.text((72, 78), "GROK  ·  HERMES", font=kicker, fill=AMBER)
     draw.text((68, 128), "GLRP", font=title, fill=INK)
     draw.text(
         (74, 300),
-        "Pick up where you left off.",
+        "New chat. Same plan.",
         font=sub,
         fill=TEAL,
     )
     draw.text(
         (74, 356),
-        "Writes the full plan down. Does one sitting.\nRuns a real check. The next session continues.",
+        "One step. A real test. Then the next step.",
         font=font(F_SANS, 26),
         fill=MUTED,
     )
-    chip(draw, (74, 500), "GOAL", AMBER)
-    chip(draw, (210, 500), "UNIT", TEAL)
-    chip(draw, (350, 500), "CHECK", INK)
+    chip(draw, (74, 500), "PLAN", AMBER)
+    chip(draw, (210, 500), "STEP", TEAL)
+    chip(draw, (346, 500), "TEST", INK)
     path = OUT / "social.png"
     img.save(path, "PNG", optimize=True)
     return path
@@ -104,16 +104,16 @@ def banner() -> Path:
     img, draw = base(w, h)
     draw.text((96, 90), "FOR GROK BUILD AND HERMES", font=font(F_SANS, 28), fill=AMBER)
     draw.text((88, 150), "GLRP", font=font(F_DISPLAY, 180), fill=INK)
-    draw.text((100, 380), "Pick up where you left off.", font=font(F_SERIF, 52), fill=TEAL)
+    draw.text((100, 380), "New chat. Same plan.", font=font(F_SERIF, 52), fill=TEAL)
     draw.text(
         (100, 460),
-        "Number the work. Do one sitting. Run a check that can fail.\nClose it. The next session already knows what’s next.",
+        "One step. A real test. Then the next step.",
         font=font(F_SANS, 32),
         fill=MUTED,
     )
-    chip(draw, (100, 640), "GOAL.md", AMBER)
-    chip(draw, (300, 640), "UNIT.md", TEAL)
-    chip(draw, (500, 640), "check.py", INK)
+    chip(draw, (100, 640), "PLAN", AMBER)
+    chip(draw, (250, 640), "STEP", TEAL)
+    chip(draw, (400, 640), "TEST", INK)
     path = OUT / "banner.png"
     img.save(path, "PNG", optimize=True)
     return path

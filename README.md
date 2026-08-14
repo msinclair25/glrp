@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="GLRP — Pick up where you left off." width="100%">
+  <img src="docs/banner.png" alt="GLRP — New chat. Same plan." width="100%">
 </p>
 
 <p align="center">
@@ -9,41 +9,38 @@
   <a href="#tests"><img src="https://img.shields.io/badge/tests-unittest-e8e4dc?labelColor=07080c" alt="tests"></a>
 </p>
 
-<p align="center"><b>GLRP keeps a coding agent on one sitting of work — and hands the next sitting to the next session.</b></p>
-
 <p align="center">A skill for <a href="https://x.ai/build">Grok Build</a> and <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a>.</p>
 
 ---
 
-## What it does
+## Why this exists
 
-You dump a messy product brief. GLRP turns that into a numbered plan, picks **one** sitting, and ties it to a command that can fail. When the sitting is green, it closes that number and writes the next one down.
+Long coding sessions with Grok keep dying. New chat = forgot the plan. Or it “continues” by building the wrong thing.
 
-A new chat opens cold. It reads the two files, does the current number, and stops. The plan lives on disk, so the work can run across days.
+## What this is
 
-**In one line:** remember what’s next, do only that, prove it.
+A tiny skill. It writes the plan as a numbered list, does **one** step, runs a real test, writes down the next step. Next chat reads that file and keeps going.
 
-## How it works
+## How
 
 ```mermaid
 flowchart LR
-  A[activate] --> B[GOAL.md numbered plan]
-  B --> C[UNIT.md this sitting]
-  C --> D[check.py]
-  D -->|keep going| C
-  D -->|green| E[close_unit.py]
-  E --> F[next number]
-  F --> C
+  A[activate] --> B[numbered plan]
+  B --> C[one step]
+  C --> D[real test]
+  D -->|not yet| C
+  D -->|green| E[write the next step]
+  E --> C
 ```
 
-| File | What the agent uses it for |
-|------|----------------------------|
-| `.glrp/GOAL.md` | The whole product, numbered. Later corrections replace earlier ones. |
-| `.glrp/UNIT.md` | The sitting in progress — files, behavior, how we’ll know it’s done. |
-| `.glrp/progress.txt` | Closed numbers, so the next session doesn’t rewind. |
-| `.glrp/config.toml` | `verify` — your real project check (`pytest`, `unittest`, a script). |
+| File | Job |
+|------|-----|
+| `.glrp/GOAL.md` | The whole plan, numbered. |
+| `.glrp/UNIT.md` | The one step happening now. |
+| `.glrp/progress.txt` | Steps already done. |
+| `.glrp/config.toml` | `verify` — your real test command. |
 
-Four scripts drive the loop: `activate.py`, `next.py`, `check.py`, `close_unit.py`.
+Scripts: `activate.py` · `next.py` · `check.py` · `close_unit.py`
 
 ## Install
 
@@ -52,17 +49,17 @@ git clone https://github.com/msinclair25/glrp.git
 bash glrp/install.sh
 ```
 
-Installs to `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those homes exist. Start a **new session** so the skill loads.
+Puts the skill in `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those folders exist. Start a **new session** so it loads.
 
 ## Use
 
 In a git project:
 
 1. Say `activate glrp` or `/glrp`.
-2. Point `verify` at a real check: `verify = "pytest -q"`.
-3. Paste the brief. The skill numbers `GOAL.md` and aims `UNIT.md` at sitting one.
-4. It implements that sitting, runs `check.py`, and closes when green.
-5. Next session: `next.py` first, then only the current number.
+2. Set `verify = "pytest -q"` (or whatever actually tests your project).
+3. Paste the brief. It numbers the plan and starts step one.
+4. It does that step, runs the test, writes the next step.
+5. Next chat: it reads the file and continues.
 
 ```
 skill/scripts/   activate.py  next.py  check.py  close_unit.py
