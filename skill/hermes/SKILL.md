@@ -1,7 +1,7 @@
 ---
 name: glrp
 description: Keep Grok on one coding unit with a check.
-version: 0.1.0
+version: 0.1.1
 author: Morgan Sinclair (msinclair25), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -25,35 +25,31 @@ Don't use for one-off questions.
 
 ## Procedure
 
-Do these in order. Use the scripts next to this file (`scripts/`).
+Do these in order. Scripts live beside this file (`scripts/`). If installed to `~/.hermes/skills/glrp/`, use that path.
 
 1. **Root.** `git rev-parse --show-toplevel`. If that fails, stop. Never activate `$HOME`.
 2. **Activate (once).**  
    `terminal(command="python3 scripts/activate.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Creates `.glrp/` if missing. Does not overwrite filled files.  
-   Ask the user to set `verify` in `.glrp/config.toml` to a command that can fail (`pytest -q`, `npm test`, …). Default `true` is a no-op.
+   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` once (including do-not-build).  
+   Set `verify` to a command that can fail **for this unit**.
 3. **Re-anchor (every session, first).**  
-   `terminal(command="python3 scripts/next.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Read that output before any other project file.
-4. **One unit.** Fill `.glrp/UNIT.md` with one sitting of work. Touch only what that unit needs.
-5. **Check.** After edits:  
+   `terminal(command="python3 scripts/next.py --cwd \"$(git rev-parse --show-toplevel)\"")`
+4. **One unit.** `UNIT.md` is work to do **now**. Never write “do not implement yet.”
+5. **Check.**  
    `terminal(command="python3 scripts/check.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Exit `10` means stay on this unit. Read `.glrp/progress.txt` tail. Do not claim done.
+   If `verify` still points at a previous slice, change it. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `terminal(command="python3 scripts/close_unit.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Then write the next unit (or stop).
-7. **Before compact / new / end.** Update `UNIT.md` and let check/close append progress. The next session starts at step 3.
-
-Scripts live beside this file. If the skill was installed to `~/.hermes/skills/glrp/`, use that `scripts/` path.
+   Immediately replace `UNIT.md` with the next sitting from GOAL. Do not implement the whole GOAL.
+7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls
 
-- Stacking this with the old GLRP-Skill playbook dumps too much context (more drift).
-- `verify = "true"` never fails — accuracy will not improve until the user sets a real check.
-- Do not rewrite `.glrp/GOAL.md` to match what you built.
+- Never put “do not implement yet” in `UNIT.md`.
+- `verify = "true"` never fails for this unit.
+- Do not rewrite `GOAL.md` to match what you built.
+- Do not stack the old GLRP-Skill playbook.
 
 ## Verification
 
-- `.glrp/GOAL.md`, `UNIT.md`, `progress.txt` exist.
-- After a failed check, progress has a `verify failed` block.
-- A new session that runs `next.py` reprints the same unit.
+- `.glrp/` files exist. Failed check appends `verify failed`. `next.py` reprints the current unit.

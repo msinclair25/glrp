@@ -18,24 +18,26 @@ Do these in order. Use the scripts next to this file (`scripts/`).
 2. **Activate (once).**  
    `python3 scripts/activate.py --cwd "$(git rev-parse --show-toplevel)"`  
    Creates `.glrp/` if missing. Does not overwrite filled files.  
-   Ask the user to set `verify` in `.glrp/config.toml` to a command that can fail (`pytest -q`, `npm test`, …). Default `true` is a no-op.
+   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` once (including do-not-build).  
+   Set `verify` in `.glrp/config.toml` to a command that can fail **for this unit**. Default `true` is a no-op.
 3. **Re-anchor (every session, first).**  
    `python3 scripts/next.py --cwd "$(git rev-parse --show-toplevel)"`  
    Read that output before any other project file.
-4. **One unit.** Fill `.glrp/UNIT.md` with one sitting of work. Touch only what that unit needs.
+4. **One unit.** `.glrp/UNIT.md` is work to do **now**. Never write “do not implement yet” (that sabotages the next session). Touch only what this unit needs.
 5. **Check.** After edits:  
    `python3 scripts/check.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Exit `10` means stay on this unit. Read `.glrp/progress.txt` tail. Do not claim done.
+   If `verify` still points at a **previous** slice, change it so this unit can fail. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `python3 scripts/close_unit.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Then write the next unit (or stop).
-7. **Before compact / new / end.** Update `UNIT.md` and let check/close append progress. The next session starts at step 3.
+   Immediately replace `UNIT.md` with the **next** sitting from GOAL (or “all units closed”). Then stop or start that unit — do not implement the whole GOAL.
+7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls
 
-- Stacking this with the old GLRP-Skill playbook dumps too much context (more drift).
-- `verify = "true"` never fails — accuracy will not improve until the user sets a real check.
+- Never put “do not implement yet” in `UNIT.md`. The next session will obey it and stall.
+- `verify = "true"` never fails — accuracy will not improve until the check can fail for **this** unit.
 - Do not rewrite `.glrp/GOAL.md` to match what you built.
+- Stacking this with the old GLRP-Skill playbook dumps too much context.
 
 ## Verification
 
