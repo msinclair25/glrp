@@ -1,7 +1,7 @@
 ---
 name: glrp
 description: Keep Grok on one coding unit with a check.
-version: 0.1.3
+version: 0.1.4
 author: Morgan Sinclair (msinclair25), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -50,7 +50,7 @@ Do these in order. Scripts live beside this file (`scripts/`). If installed to `
 - A sitting that ships 1–3 must close 1, 2, and 3.
 - After a green close, do the next number now.
 - Do-not-build is not a unit.
-- `verify = "true"` never fails for this unit.
+- `verify = "true"` is refused once GOAL is numbered.
 - Do not rewrite `GOAL.md` to match what you built.
 - Do not stack the old GLRP-Skill playbook.
 

@@ -147,7 +147,7 @@ class TestCloseUnit(unittest.TestCase):
             root = Path(raw)
             git_init(root)
             self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
-            (root / ".glrp" / "config.toml").write_text('verify = "true"\n', encoding="utf-8")
+            (root / ".glrp" / "config.toml").write_text('verify = ":"\n', encoding="utf-8")
             (root / ".glrp" / "GOAL.md").write_text(
                 "# Goal\n1. person\n2. charge\n3. list\n",
                 encoding="utf-8",
@@ -158,6 +158,18 @@ class TestCloseUnit(unittest.TestCase):
             self.assertIn("KEEP GOING", proc.stdout)
             self.assertIn("2. charge", proc.stdout)
             self.assertIn("2 product steps left", proc.stdout)
+
+    def test_refuses_true_once_goal_is_numbered(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            git_init(root)
+            self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
+            (root / ".glrp" / "GOAL.md").write_text("# Goal\n1. add list\n", encoding="utf-8")
+            (root / ".glrp" / "config.toml").write_text('verify = "true"\n', encoding="utf-8")
+            proc = run_script("check.py", "--cwd", str(root))
+            self.assertEqual(proc.returncode, 10)
+            progress = (root / ".glrp" / "progress.txt").read_text(encoding="utf-8")
+            self.assertIn("no-op", progress)
 
 
 if __name__ == "__main__":

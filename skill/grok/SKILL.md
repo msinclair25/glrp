@@ -52,7 +52,7 @@ Do these in order. Use the scripts next to this file (`scripts/`).
 - A sitting that ships 1–3 must close 1, 2, and 3. Closing only “1” makes the next session rewind.
 - After a green close, do the next number now. Do not stop and wait for a new chat.
 - Do-not-build is not a unit. Don’t sit on “don’t build Venmo.”
-- `verify = "true"` never fails — accuracy will not improve until the check can fail for **this** unit.
+- `verify = "true"` is refused once GOAL is numbered. A story does not close the unit.
 - Do not rewrite `.glrp/GOAL.md` to match what you built.
 - Stacking this with the old GLRP-Skill playbook dumps too much context.
 

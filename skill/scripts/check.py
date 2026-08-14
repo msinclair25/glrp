@@ -11,7 +11,14 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from glrp_lib import GLRP_DIR, assert_safe, resolve_root  # noqa: E402
+from glrp_lib import (  # noqa: E402
+    GLRP_DIR,
+    assert_safe,
+    numbered_product_lines,
+    resolve_root,
+)
+
+_NOOP = {"true", "/bin/true", "/usr/bin/true"}
 
 
 def read_verify(config: Path) -> str:
@@ -32,6 +39,16 @@ def append_progress(root: Path, body: str) -> None:
 
 def run_check(root: Path) -> int:
     cmd = read_verify(root / GLRP_DIR / "config.toml")
+    goal_path = root / GLRP_DIR / "GOAL.md"
+    goal = goal_path.read_text(encoding="utf-8") if goal_path.exists() else ""
+    if cmd.strip() in _NOOP and numbered_product_lines(goal):
+        msg = (
+            "verify is a no-op (true). Set .glrp/config.toml to a command "
+            "that can fail for this unit — a story does not count."
+        )
+        print(msg, file=sys.stderr)
+        append_progress(root, "verify failed: no-op true with a numbered GOAL")
+        return 10
     proc = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, text=True)
     if proc.returncode == 0:
         return 0
