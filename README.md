@@ -2,19 +2,41 @@
 
 A **skill** for [Grok Build](https://x.ai/build) and [Hermes Agent](https://hermes-agent.nousresearch.com/) (Grok as the model).
 
-It is meant to make agentic coding **more accurate**, **less amnesiac**, and **less drifted** — not another playbook.
+More **accurate**, less **amnesiac**, less **drifted** agentic coding. Not a playbook.
 
-This is **not** [GLRP-Skill](https://github.com/msinclair25/GLRP-Skill) (file scaffold + long playbook). Do not install both on the same project until this skill has been measured.
+Not [GLRP-Skill](https://github.com/msinclair25/GLRP-Skill). Do not run both on the same project.
 
-## Status
+## Install
 
-New. Scripts and `SKILL.md` are not here yet. Planning lives in a local vault; this repo will hold only the skill package.
+```bash
+git clone https://github.com/msinclair25/glrp.git
+bash glrp/install.sh
+```
 
-## Intended install (when shipped)
+Copies into `~/.grok/skills/glrp/` and/or `~/.hermes/skills/glrp/` if those homes exist. New session so skills reload.
 
-One command copies the skill into `~/.grok/skills/glrp/` and/or `~/.hermes/skills/glrp/` if those homes exist.
+## Use
 
-Then, in a project: activate the skill. It keeps three small files (goal, current unit, progress), re-reads them first each session, works one unit, and runs **your** test/smoke command before calling the unit done.
+In a **git project**:
+
+1. Say `activate glrp` or `/glrp`.
+2. Set `.glrp/config.toml` → `verify = "pytest -q"` (or your real check). `true` never fails.
+3. Fill `.glrp/GOAL.md` (one page) and `.glrp/UNIT.md` (one sitting).
+4. After edits the agent must run `check.py`. Red → stay on the unit.
+5. New session: run `next.py` first.
+
+## Layout
+
+```
+skill/scripts/   activate.py  next.py  check.py  close_unit.py
+.glrp/           GOAL.md  UNIT.md  progress.txt  config.toml
+```
+
+## Tests
+
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ## License
 
