@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="GLRP — New chat. Same plan." width="100%">
+  <img src="docs/banner.png" alt="GLRP — Problem: long Grok coding sessions keep dying. Solution: a tiny skill that writes the plan, does one step, runs a real test, and leaves the next step for the next chat." width="100%">
 </p>
 
 <p align="center">
@@ -13,13 +13,13 @@
 
 ---
 
-## Why this exists
+## Problem
 
-Long coding sessions with Grok keep dying. New chat = forgot the plan. Or it “continues” by building the wrong thing.
+Long coding sessions with Grok keeps dying.
 
-## What this is
+## Solution
 
-A tiny skill. It writes the plan as a numbered list, does **one** step, runs a real test, writes down the next step. Next chat reads that file and keeps going.
+A tiny skill. It writes the plan as a numbered list, does one step, runs a real test, writes down the next step. Next chat reads that file and keeps going.
 
 ## How
 

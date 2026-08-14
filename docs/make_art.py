@@ -17,7 +17,6 @@ MUTED = (150, 146, 136)
 AMBER = (245, 193, 92)
 TEAL = (62, 224, 197)
 LINE = (32, 34, 42)
-CARD = (16, 17, 23)
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -28,11 +27,17 @@ F_DISPLAY = "/System/Library/Fonts/Supplemental/Arial Black.ttf"
 F_SANS = "/System/Library/Fonts/SFNS.ttf"
 F_SERIF = "/System/Library/Fonts/NewYork.ttf"
 
+PROBLEM = "Long coding sessions with Grok keeps dying."
+SOLUTION = (
+    "A tiny skill. It writes the plan as a numbered list, does one step,\n"
+    "runs a real test, writes down the next step.\n"
+    "Next chat reads that file and keeps going."
+)
+
 
 def base(w: int, h: int) -> tuple[Image.Image, ImageDraw.ImageDraw]:
     img = Image.new("RGB", (w, h), BG)
     px = img.load()
-    # faint vertical grain + vignette
     for y in range(h):
         for x in range(0, w, 3):
             n = (x * 17 + y * 31) % 11
@@ -46,54 +51,26 @@ def base(w: int, h: int) -> tuple[Image.Image, ImageDraw.ImageDraw]:
     glow = glow.filter(ImageFilter.GaussianBlur(90))
     img = Image.blend(img, glow, 0.45)
     draw = ImageDraw.Draw(img)
-    # grid
     for x in range(0, w, 48):
         draw.line((x, 0, x, h), fill=LINE)
     for y in range(0, h, 48):
         draw.line((0, y, w, y), fill=LINE)
-    # top accent bar
     draw.rectangle((0, 0, w, 4), fill=AMBER)
     return img, draw
-
-
-def chip(draw: ImageDraw.ImageDraw, xy: tuple[int, int], text: str, fill: tuple[int, int, int]) -> None:
-    x, y = xy
-    pad_x, pad_y = 18, 10
-    f = font(F_SANS, 22)
-    bbox = draw.textbbox((0, 0), text, font=f)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    draw.rounded_rectangle(
-        (x, y, x + tw + pad_x * 2, y + th + pad_y * 2),
-        radius=8,
-        outline=fill,
-        width=2,
-    )
-    draw.text((x + pad_x, y + pad_y - 2), text, font=f, fill=fill)
 
 
 def social() -> Path:
     w, h = 1280, 640
     img, draw = base(w, h)
-    kicker = font(F_SANS, 22)
-    title = font(F_DISPLAY, 132)
-    sub = font(F_SERIF, 36)
-    draw.text((72, 78), "GROK  ·  HERMES", font=kicker, fill=AMBER)
-    draw.text((68, 128), "GLRP", font=title, fill=INK)
-    draw.text(
-        (74, 300),
-        "New chat. Same plan.",
-        font=sub,
-        fill=TEAL,
-    )
-    draw.text(
-        (74, 356),
-        "One step. A real test. Then the next step.",
-        font=font(F_SANS, 26),
-        fill=MUTED,
-    )
-    chip(draw, (74, 500), "PLAN", AMBER)
-    chip(draw, (210, 500), "STEP", TEAL)
-    chip(draw, (346, 500), "TEST", INK)
+    draw.text((72, 56), "GROK  ·  HERMES", font=font(F_SANS, 20), fill=AMBER)
+    draw.text((68, 92), "GLRP", font=font(F_DISPLAY, 96), fill=INK)
+
+    draw.text((74, 230), "PROBLEM", font=font(F_SANS, 18), fill=AMBER)
+    draw.text((74, 258), PROBLEM, font=font(F_SERIF, 30), fill=INK)
+
+    draw.text((74, 330), "SOLUTION", font=font(F_SANS, 18), fill=TEAL)
+    draw.text((74, 358), SOLUTION, font=font(F_SANS, 24), fill=MUTED, spacing=8)
+
     path = OUT / "social.png"
     img.save(path, "PNG", optimize=True)
     return path
@@ -102,18 +79,15 @@ def social() -> Path:
 def banner() -> Path:
     w, h = 2400, 800
     img, draw = base(w, h)
-    draw.text((96, 90), "FOR GROK BUILD AND HERMES", font=font(F_SANS, 28), fill=AMBER)
-    draw.text((88, 150), "GLRP", font=font(F_DISPLAY, 180), fill=INK)
-    draw.text((100, 380), "New chat. Same plan.", font=font(F_SERIF, 52), fill=TEAL)
-    draw.text(
-        (100, 460),
-        "One step. A real test. Then the next step.",
-        font=font(F_SANS, 32),
-        fill=MUTED,
-    )
-    chip(draw, (100, 640), "PLAN", AMBER)
-    chip(draw, (250, 640), "STEP", TEAL)
-    chip(draw, (400, 640), "TEST", INK)
+    draw.text((96, 64), "FOR GROK BUILD AND HERMES", font=font(F_SANS, 26), fill=AMBER)
+    draw.text((88, 110), "GLRP", font=font(F_DISPLAY, 140), fill=INK)
+
+    draw.text((100, 300), "PROBLEM", font=font(F_SANS, 22), fill=AMBER)
+    draw.text((100, 338), PROBLEM, font=font(F_SERIF, 40), fill=INK)
+
+    draw.text((100, 430), "SOLUTION", font=font(F_SANS, 22), fill=TEAL)
+    draw.text((100, 472), SOLUTION, font=font(F_SANS, 30), fill=MUTED, spacing=10)
+
     path = OUT / "banner.png"
     img.save(path, "PNG", optimize=True)
     return path
