@@ -18,7 +18,7 @@ Do these in order. Use the scripts next to this file (`scripts/`).
 2. **Activate (once).**  
    `python3 scripts/activate.py --cwd "$(git rev-parse --show-toplevel)"`  
    Creates `.glrp/` if missing. Does not overwrite filled files.  
-   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` once (including do-not-build).  
+   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` as a **numbered list** (1., 2., 3. …) including do-not-build. Every product behavior gets a number.  
    Set `verify` in `.glrp/config.toml` to a command that can fail **for this unit**. Default `true` is a no-op.
 3. **Re-anchor (every session, first).**  
    `python3 scripts/next.py --cwd "$(git rev-parse --show-toplevel)"`  
@@ -29,7 +29,7 @@ Do these in order. Use the scripts next to this file (`scripts/`).
    If `verify` still points at a **previous** slice, change it so this unit can fail. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `python3 scripts/close_unit.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Immediately replace `UNIT.md` with the **next** sitting from GOAL (or “all units closed”). Then stop or start that unit — do not implement the whole GOAL.
+   Immediately set `UNIT.md` to the **lowest GOAL number not yet closed** (cite the number). Never skip a number. Write “all units closed” only if every GOAL number appears in `progress.txt`. Do not implement the whole GOAL this session.
 7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls

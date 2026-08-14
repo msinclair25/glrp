@@ -30,7 +30,7 @@ Do these in order. Scripts live beside this file (`scripts/`). If installed to `
 1. **Root.** `git rev-parse --show-toplevel`. If that fails, stop. Never activate `$HOME`.
 2. **Activate (once).**  
    `terminal(command="python3 scripts/activate.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` once (including do-not-build).  
+   If the user dumped a long brief, write **all later work** into `.glrp/GOAL.md` as a numbered list. Every product behavior gets a number.  
    Set `verify` to a command that can fail **for this unit**.
 3. **Re-anchor (every session, first).**  
    `terminal(command="python3 scripts/next.py --cwd \"$(git rev-parse --show-toplevel)\"")`
@@ -40,7 +40,7 @@ Do these in order. Scripts live beside this file (`scripts/`). If installed to `
    If `verify` still points at a previous slice, change it. Exit `10` → stay on this unit.
 6. **Close.** Only when check is `0`:  
    `terminal(command="python3 scripts/close_unit.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Immediately replace `UNIT.md` with the next sitting from GOAL. Do not implement the whole GOAL.
+   Immediately set `UNIT.md` to the lowest GOAL number not yet closed. Never skip a number. “all units closed” only if every GOAL number is in progress.txt.
 7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
 
 ## Pitfalls
