@@ -9,41 +9,41 @@
   <a href="#tests"><img src="https://img.shields.io/badge/tests-unittest-e8e4dc?labelColor=07080c" alt="tests"></a>
 </p>
 
-<p align="center"><b>A tiny skill so Grok doesn’t forget the plan, rewrite the last sitting, or wander off the job.</b></p>
+<p align="center"><b>GLRP keeps a coding agent on one sitting of work — and hands the next sitting to the next session.</b></p>
 
-<p align="center">For <a href="https://x.ai/build">Grok Build</a> and <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a>. Not a playbook. Not a second brain.</p>
+<p align="center">A skill for <a href="https://x.ai/build">Grok Build</a> and <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a>.</p>
 
 ---
 
-## The problem
+## What it does
 
-Long agentic coding dies in three boring ways:
+You dump a messy product brief. GLRP turns that into a numbered plan, picks **one** sitting, and ties it to a command that can fail. When the sitting is green, it closes that number and writes the next one down.
 
-1. **Amnesia** — new session, no idea what’s next.
-2. **Drift** — it “helps” by building the website you said not to build.
-3. **Fake green** — `verify = true` never fails, so it ships vibes.
+A new chat opens cold. It reads the two files, does the current number, and stops. The plan lives on disk, so the work can run across days.
 
-GLRP is three files and four scripts. That’s the product.
+**In one line:** remember what’s next, do only that, prove it.
 
-## The loop
+## How it works
 
 ```mermaid
 flowchart LR
-  A[activate] --> B[GOAL.md numbered]
-  B --> C[UNIT.md one sitting]
+  A[activate] --> B[GOAL.md numbered plan]
+  B --> C[UNIT.md this sitting]
   C --> D[check.py]
-  D -->|red| C
+  D -->|keep going| C
   D -->|green| E[close_unit.py]
   E --> F[next number]
   F --> C
 ```
 
-| File | Job |
-|------|-----|
-| `.glrp/GOAL.md` | The whole product, numbered. Later corrections win. Do-not-build is *not* a unit. |
-| `.glrp/UNIT.md` | What to do **now**. Never “do not implement yet.” |
-| `.glrp/progress.txt` | What already closed. Every number in a sitting, not just the first. |
-| `.glrp/config.toml` | `verify` — a command that can **fail**. |
+| File | What the agent uses it for |
+|------|----------------------------|
+| `.glrp/GOAL.md` | The whole product, numbered. Later corrections replace earlier ones. |
+| `.glrp/UNIT.md` | The sitting in progress — files, behavior, how we’ll know it’s done. |
+| `.glrp/progress.txt` | Closed numbers, so the next session doesn’t rewind. |
+| `.glrp/config.toml` | `verify` — your real project check (`pytest`, `unittest`, a script). |
+
+Four scripts drive the loop: `activate.py`, `next.py`, `check.py`, `close_unit.py`.
 
 ## Install
 
@@ -52,28 +52,22 @@ git clone https://github.com/msinclair25/glrp.git
 bash glrp/install.sh
 ```
 
-Copies into `~/.grok/skills/glrp/` and/or `~/.hermes/skills/glrp/` if those homes exist. **Start a new session** so the skill reloads.
+Installs to `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those homes exist. Start a **new session** so the skill loads.
 
 ## Use
 
-In a **git project** (never `$HOME`):
+In a git project:
 
 1. Say `activate glrp` or `/glrp`.
-2. Set `.glrp/config.toml` → `verify = "pytest -q"` (or your real check).
-3. Dump the brief. The skill numbers `GOAL.md` and aims `UNIT.md` at the first sitting.
-4. After edits: `check.py`. Red → stay. Green → `close_unit.py`.
-5. New session: `next.py` first. Then only the current number.
+2. Point `verify` at a real check: `verify = "pytest -q"`.
+3. Paste the brief. The skill numbers `GOAL.md` and aims `UNIT.md` at sitting one.
+4. It implements that sitting, runs `check.py`, and closes when green.
+5. Next session: `next.py` first, then only the current number.
 
 ```
 skill/scripts/   activate.py  next.py  check.py  close_unit.py
 .glrp/           GOAL.md  UNIT.md  progress.txt  config.toml
 ```
-
-## What it is not
-
-- Not [GLRP-Skill](https://github.com/msinclair25/GLRP-Skill). Do **not** run both on the same project.
-- Not a bigger prompt. Extra playbook is more drift.
-- Not a promise Grok can finish every sitting. When `UNIT` + a real check still fails, that’s the model — not a missing paragraph.
 
 ## Tests
 

@@ -77,7 +77,7 @@ def social() -> Path:
     kicker = font(F_SANS, 22)
     title = font(F_DISPLAY, 132)
     sub = font(F_SERIF, 36)
-    draw.text((72, 78), "GROK  ·  HERMES  ·  ONE UNIT", font=kicker, fill=AMBER)
+    draw.text((72, 78), "GROK  ·  HERMES  ·  AGENTIC CODING", font=kicker, fill=AMBER)
     draw.text((68, 128), "GLRP", font=title, fill=INK)
     draw.text(
         (74, 300),
@@ -87,7 +87,7 @@ def social() -> Path:
     )
     draw.text(
         (74, 356),
-        "A tiny skill so Grok doesn’t forget the plan,\nrewrite the last sitting, or wander off the job.",
+        "Writes the full plan down. Does one sitting.\nRuns a real check. The next session continues.",
         font=font(F_SANS, 26),
         fill=MUTED,
     )
@@ -102,7 +102,7 @@ def social() -> Path:
 def banner() -> Path:
     w, h = 2400, 800
     img, draw = base(w, h)
-    draw.text((96, 90), "SKILL  ·  NOT A PLAYBOOK", font=font(F_SANS, 28), fill=AMBER)
+    draw.text((96, 90), "FOR GROK BUILD AND HERMES", font=font(F_SANS, 28), fill=AMBER)
     draw.text((88, 150), "GLRP", font=font(F_DISPLAY, 180), fill=INK)
     draw.text((100, 380), "Stay on the unit.", font=font(F_SERIF, 52), fill=TEAL)
     draw.text(
