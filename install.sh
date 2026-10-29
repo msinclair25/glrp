@@ -21,20 +21,30 @@ install_one() {
 }
 
 found=0
-if [[ -d "${GROK_HOME:-$HOME/.grok}" ]]; then
-  install_one "${GROK_HOME:-$HOME/.grok}/skills/glrp" "$SRC/grok/SKILL.md"
-  mkdir -p "${GROK_HOME:-$HOME/.grok}/hooks"
-  cp "$SRC/grok/hooks/glrp-stop.json" "${GROK_HOME:-$HOME/.grok}/hooks/glrp-stop.json"
-  echo "Installed hook: ${GROK_HOME:-$HOME/.grok}/hooks/glrp-stop.json"
+default_grok_home=""
+default_hermes_home=""
+if [[ -n "${HOME:-}" ]]; then
+  default_grok_home="$HOME/.grok"
+  default_hermes_home="$HOME/.hermes"
+fi
+grok_home="${GROK_HOME:-$default_grok_home}"
+hermes_home="${HERMES_HOME:-$default_hermes_home}"
+
+if [[ -n "$grok_home" && -d "$grok_home" ]]; then
+  install_one "$grok_home/skills/glrp" "$SRC/grok/SKILL.md"
+  mkdir -p "$grok_home/hooks"
+  cp "$SRC/grok/hooks/glrp-stop.json" "$grok_home/hooks/glrp-stop.json"
+  echo "Installed hook: $grok_home/hooks/glrp-stop.json"
   found=1
 fi
-if [[ -d "${HERMES_HOME:-$HOME/.hermes}" ]]; then
-  install_one "${HERMES_HOME:-$HOME/.hermes}/skills/glrp" "$SRC/hermes/SKILL.md"
+if [[ -n "$hermes_home" && -d "$hermes_home" ]]; then
+  install_one "$hermes_home/skills/glrp" "$SRC/hermes/SKILL.md"
   found=1
 fi
 
 if [[ "$found" -eq 0 ]]; then
-  echo "error: neither ~/.grok nor ~/.hermes exists" >&2
+  echo "error: neither a Grok home nor a Hermes home exists" >&2
+  echo "set GROK_HOME or HERMES_HOME when using a non-default location" >&2
   exit 1
 fi
 

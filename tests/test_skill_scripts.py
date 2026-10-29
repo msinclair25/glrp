@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "skill" / "scripts"
+HOOK = ROOT / "skill" / "grok" / "hooks" / "glrp-stop.json"
 
 
 def run_script(name: str, *args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -215,6 +216,50 @@ class TestStopGate(unittest.TestCase):
             proc = self._run(root, {"reason": "end_turn"})
             self.assertEqual(proc.returncode, 0, proc.stderr)
             self.assertEqual(proc.stdout.strip(), "")
+
+
+class TestInstaller(unittest.TestCase):
+    def test_installs_both_wrappers_and_is_idempotent(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            grok_home = root / "custom-grok"
+            hermes_home = root / "custom-hermes"
+            grok_home.mkdir()
+            hermes_home.mkdir()
+            env = os.environ.copy()
+            env["GROK_HOME"] = str(grok_home)
+            env["HERMES_HOME"] = str(hermes_home)
+
+            for _ in range(2):
+                proc = subprocess.run(
+                    ["bash", str(ROOT / "install.sh")],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                )
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+
+            self.assertEqual(
+                (grok_home / "skills" / "glrp" / "SKILL.md").read_text(encoding="utf-8"),
+                (ROOT / "skill" / "grok" / "SKILL.md").read_text(encoding="utf-8"),
+            )
+            self.assertEqual(
+                (hermes_home / "skills" / "glrp" / "SKILL.md").read_text(encoding="utf-8"),
+                (ROOT / "skill" / "hermes" / "SKILL.md").read_text(encoding="utf-8"),
+            )
+            installed_hook = grok_home / "hooks" / "glrp-stop.json"
+            self.assertTrue(installed_hook.is_file())
+            self.assertEqual(
+                json.loads(installed_hook.read_text(encoding="utf-8")),
+                json.loads(HOOK.read_text(encoding="utf-8")),
+            )
+
+    def test_hook_honors_custom_grok_home(self) -> None:
+        command = json.loads(HOOK.read_text(encoding="utf-8"))["hooks"]["Stop"][0]["hooks"][0][
+            "command"
+        ]
+        self.assertIn("${GROK_HOME:-$HOME/.grok}", command)
 
 
 if __name__ == "__main__":

@@ -42,14 +42,27 @@ flowchart LR
 
 Scripts: `activate.py` · `next.py` · `check.py` · `close_unit.py`
 
+## Grok 4.7 compatibility
+
+Verified with **Grok Build CLI 1.0.41**, where `grok-4.7` is the default and
+`grok-4.7-build-fast` is also available. GLRP is model-agnostic: it does not
+hard-code a model or context limit, so both entries use the same skill and
+workflow. Use `grok models` to check the live catalog. Requires Git and
+Python 3.10+.
+
 ## Install
 
 ```bash
-git clone https://github.com/msinclair25/glrp.git
-bash glrp/install.sh
+glrp_tmp="$(mktemp -d)" && (trap 'rm -rf "$glrp_tmp"' EXIT; git clone --depth 1 https://github.com/msinclair25/glrp.git "$glrp_tmp/glrp" && bash "$glrp_tmp/glrp/install.sh")
 ```
 
-Puts the skill in `~/.grok/skills/glrp/` and `~/.hermes/skills/glrp/` when those folders exist. On Grok Build it also installs a Stop hook that kicks once if the model quits with steps left. Start a **new session** so it loads.
+Puts the skill in `${GROK_HOME:-$HOME/.grok}/skills/glrp/` and, when a Hermes
+home exists, `${HERMES_HOME:-$HOME/.hermes}/skills/glrp/`. On Grok Build it
+also installs a Stop hook that kicks once if the model quits with steps left.
+The temporary clone is removed automatically.
+
+Start a **new session** so the skill and hook load. `grok inspect` should list
+`glrp` under Skills and the installed Stop hook under Hooks.
 
 ## Use
 
@@ -60,6 +73,9 @@ In a git project:
 3. Paste the brief. It numbers the plan and starts step one.
 4. It does that step, runs the test, writes the next step, and **keeps going** this sitting.
 5. If you start a new chat, it reads the file and continues.
+
+Use this current `glrp` edition by itself in a project. Do not activate the
+deprecated `long-running-project` / `GLRP-Skill` playbook in the same project.
 
 ```
 skill/scripts/   activate.py  next.py  check.py  close_unit.py

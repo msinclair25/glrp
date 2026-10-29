@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$HOME/.grok/skills/glrp/scripts/stop_gate.py\"",
+            "command": "python3 \"${GROK_HOME:-$HOME/.grok}/skills/glrp/scripts/stop_gate.py\"",
             "timeout": 30
           }
         ]
