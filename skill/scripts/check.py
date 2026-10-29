@@ -5,10 +5,17 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import re
 import subprocess
 import sys
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        raise SystemExit("Python 3.10 requires tomli: python3 -m pip install tomli")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from glrp_lib import (  # noqa: E402
@@ -18,16 +25,18 @@ from glrp_lib import (  # noqa: E402
     resolve_root,
 )
 
-_NOOP = {"true", "/bin/true", "/usr/bin/true"}
+_NOOP = {"true", "/bin/true", "/usr/bin/true", ":", "exit 0"}
 
 
 def read_verify(config: Path) -> str:
-    text = config.read_text(encoding="utf-8") if config.exists() else ""
-    m = re.search(r'(?m)^\s*verify\s*=\s*["\'](.+)["\']\s*$', text)
-    if not m:
-        print("ERROR: no verify = \"...\" in .glrp/config.toml", file=sys.stderr)
+    try:
+        command = tomllib.loads(config.read_text(encoding="utf-8")).get("verify")
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: cannot read {config}: {exc}", file=sys.stderr)
         raise SystemExit(2)
-    return m.group(1)
+    if not isinstance(command, str) or not command.strip():
+        raise SystemExit('ERROR: set verify = "your test command" in .glrp/config.toml')
+    return command
 
 
 def append_progress(root: Path, body: str) -> None:

@@ -15,7 +15,7 @@
 
 ## Problem
 
-Long coding sessions with Grok keeps dying.
+Long coding sessions with Grok keep losing their place.
 
 ## Solution
 
@@ -37,7 +37,8 @@ flowchart LR
 |------|-----|
 | `.glrp/GOAL.md` | The whole plan, numbered. |
 | `.glrp/UNIT.md` | The one step happening now. |
-| `.glrp/progress.txt` | Steps already done. |
+| `.glrp/progress.txt` | Human-readable checks and closure history. |
+| `.glrp/completed.json` | Verified goal lines, recorded by the close command. |
 | `.glrp/config.toml` | `verify` — your real test command. |
 
 Scripts: `activate.py` · `next.py` · `check.py` · `close_unit.py`
@@ -49,6 +50,10 @@ Verified with **Grok Build CLI 1.0.41**, where `grok-4.7` is the default and
 hard-code a model or context limit, so both entries use the same skill and
 workflow. Use `grok models` to check the live catalog. Requires Git and
 Python 3.10+.
+
+Python 3.11+ needs no additional packages. On Python 3.10, first run
+`python3 -m pip install tomli` for TOML support. Installation checks this before
+replacing an existing skill. Use Bash on macOS/Linux or WSL/Git Bash on Windows.
 
 ## Install
 
@@ -73,6 +78,32 @@ In a git project:
 3. Paste the brief. It numbers the plan and starts step one.
 4. It does that step, runs the test, writes the next step, and **keeps going** this sitting.
 5. If you start a new chat, it reads the file and continues.
+
+Copy the exact numbered goal line into `UNIT.md`. The close command runs the
+configured verification and records completion only after success:
+
+```bash
+python3 "${GROK_HOME:-$HOME/.grok}/skills/glrp/scripts/close_unit.py" --cwd "$(git rev-parse --show-toplevel)"
+```
+
+There is no need to run `check.py` first. It remains available for checks that
+should not close a step. TOML comments and escaped quotes are supported, for example:
+
+```toml
+verify = "python3 -m unittest discover -s tests -v" # use your project's tests
+```
+
+### Updating an existing installation
+
+Re-run the installer, then start a new Grok session. Reinstallation stages the
+replacement before swapping it in. Project state is preserved. `.glrp` and its
+state files must be regular local paths; symlinks are refused.
+
+Older `progress.txt` history is kept, but is no longer trusted as completion
+evidence because it also contains test output. Review previously finished work,
+put its exact numbered goal lines in `UNIT.md`, and close them once to create
+`completed.json`. No automatic log migration can safely distinguish old test
+output from genuine closure records. Changed goal lines require verification again.
 
 Use this current `glrp` edition by itself in a project. Do not activate the
 deprecated `long-running-project` / `GLRP-Skill` playbook in the same project.

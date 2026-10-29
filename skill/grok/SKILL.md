@@ -1,65 +1,47 @@
 ---
 name: glrp
-description: >-
-  Activate GLRP for agentic coding: re-anchor to goal and one unit,
-  run the project check, write progress. Use when the user says
-  "activate glrp", "activate long running", "long running project",
-  or /glrp. Do not use for one-off questions.
+description: Keep a numbered coding plan moving through verified steps. Use for "activate glrp" or /glrp, not one-off questions.
 user-invocable: true
-argument-hint: "[optional unit]"
-metadata:
-  short-description: "Accurate, on-task Grok coding (goal + unit + check)"
+argument-hint: "[optional goal]"
 ---
 
 # GLRP
 
-Keep Grok on one software unit: re-read the job, edit, run the check, write progress.
+Use the current GLRP edition alone in a project; do not also activate the legacy long-running-project playbook.
 
-Do **not** load a playbook. Do **not** install the old `long-running-project` / GLRP-Skill activate in this repo at the same time.
+## Workflow
 
-## When to use
+Run commands from the user's project directory. Resolve its Git root first:
+`git rev-parse --show-toplevel`. Stop if it fails; never activate the home directory.
 
-User is doing agentic coding (feature, bug, refactor) and wants less drift, less amnesia, more accuracy. Triggers: "activate glrp", "activate long running", `/glrp`.
+1. Activate once:
+   ```bash
+   python3 "${GROK_HOME:-$HOME/.grok}/skills/glrp/scripts/activate.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+   Fill `.glrp/GOAL.md` with unique numbered product steps (`1. …`, `2. …`).
+   Keep exclusions unnumbered. Copy the exact current goal line into `.glrp/UNIT.md`.
+   Set `verify` in `.glrp/config.toml` to a real test command for that step.
+2. At each new session, read the handoff:
+   ```bash
+   python3 "${GROK_HOME:-$HOME/.grok}/skills/glrp/scripts/next.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+3. Implement the current unit. Keep changes scoped to that step. Do not rewrite the goal to match incomplete work.
+4. Verify and close in one command:
+   ```bash
+   python3 "${GROK_HOME:-$HOME/.grok}/skills/glrp/scripts/close_unit.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+   This runs verification itself; no separate check is required. Failure never records completion.
+   For diagnostics without closing, use `check.py` from the same installed scripts directory.
+   If multiple steps were finished, put each exact goal line in UNIT before closing.
+5. On `KEEP GOING`, copy the next unfinished goal line into UNIT and continue this sitting.
+   Stop when every product step is verified, or when user input/authorization is needed.
+   On a failed check, fix the current unit; do not advance it.
+6. Before ending or compacting, leave UNIT describing the work to do next.
+   `completed.json` is maintained by the close command; never edit it to bypass verification.
+   `progress.txt` is a human-readable history, not completion authority.
 
-Don't use for one-off questions.
+The Grok Stop hook gives one continuation reminder when product steps remain.
 
-## Procedure
+## Upgrade note
 
-Do these in order. Use the scripts next to this file (`scripts/`).
-
-1. **Root.** `git rev-parse --show-toplevel`. If that fails, stop. Never activate `$HOME`.
-2. **Activate (once).**  
-   `python3 scripts/activate.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Creates `.glrp/` if missing. Does not overwrite filled files.  
-   If the user dumped a long brief, write **product** work into `.glrp/GOAL.md` as a numbered list (1., 2., 3. …). If the brief contradicts itself, keep the **later** correction. Put do-not-build in a short unnumbered list at the bottom — those are not units.  
-   Set `verify` in `.glrp/config.toml` to a command that can fail **for this unit**. Default `true` is a no-op.
-3. **Re-anchor (every session, first).**  
-   `python3 scripts/next.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Read that output before any other project file.
-4. **One unit at a time.** `.glrp/UNIT.md` is work to do **now**. Never write “do not implement yet” (that sabotages the next session). Touch only what this unit needs. Do not dump the whole GOAL in one edit.
-5. **Check.** After edits:  
-   `python3 scripts/check.py --cwd "$(git rev-parse --show-toplevel)"`  
-   If `verify` still points at a **previous** slice, change it so this unit can fail. Exit `10` → stay on this unit.
-6. **Close.** Only when check is `0`:  
-   `python3 scripts/close_unit.py --cwd "$(git rev-parse --show-toplevel)"`  
-   Immediately set `UNIT.md` to the lowest **product** GOAL number not yet in `progress.txt` (cite the number). If this sitting finished several numbers, list all of them in `UNIT.md` before close. If UNIT is already implemented, close it and advance. Never make a do-not-build line the current unit. “all units closed” only when every **product** number is in `progress.txt`.  
-   If `close_unit.py` prints `KEEP GOING`, do that next unit **now** — go back to step 4. Do not stop and wait for a new chat. Stop only when the check fails or every product number is closed.
-7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
-
-Grok Build: a Stop hook kicks **once** if you try to end the turn with product steps left. Hermes cannot do that.
-
-## Pitfalls
-
-- Never put “do not implement yet” in `UNIT.md`. The next session will obey it and stall.
-- A sitting that ships 1–3 must close 1, 2, and 3. Closing only “1” makes the next session rewind.
-- After a green close, do the next number now. Do not stop and wait for a new chat.
-- Do-not-build is not a unit. Don’t sit on “don’t build Venmo.”
-- `verify = "true"` is refused once GOAL is numbered. A story does not close the unit.
-- Do not rewrite `.glrp/GOAL.md` to match what you built.
-- Stacking this with the old GLRP-Skill playbook dumps too much context.
-
-## Verification
-
-- `.glrp/GOAL.md`, `UNIT.md`, `progress.txt` exist.
-- After a failed check, progress has a `verify failed` block.
-- A new session that runs `next.py` reprints the same unit.
+Older text-log completions remain in progress.txt, but must be verified and closed once to populate completed.json. Review the existing work before re-closing; do not rebuild it merely because it lacks a new completion record.

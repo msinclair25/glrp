@@ -12,31 +12,24 @@ from check import append_progress, run_check  # noqa: E402
 from glrp_lib import (  # noqa: E402
     GLRP_DIR,
     assert_safe,
+    numbered_product_lines,
+    record_completed,
     remaining_product_lines,
     resolve_root,
 )
 
 
 def unit_summaries(root: Path) -> list[str]:
-    """Every numbered GOAL line in UNIT.md, else the first body line.
-
-    A sitting that shipped 1–3 must list those numbers so progress records
-    all of them. Recording only the first line made the next session rewind.
-    """
-    text = (root / GLRP_DIR / "UNIT.md").read_text(encoding="utf-8")
-    numbered: list[str] = []
-    fallback = ""
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line[:1].isdigit() and "." in line[:4]:
-            numbered.append(line)
-        elif not fallback:
-            fallback = line
-    if numbered:
-        return numbered
-    return [fallback or "(empty UNIT.md)"]
+    """Require exact numbered goal lines; prose and decimal versions cannot close work."""
+    try:
+        goal = numbered_product_lines((root / GLRP_DIR / "GOAL.md").read_text(encoding="utf-8"))
+        units = numbered_product_lines((root / GLRP_DIR / "UNIT.md").read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise SystemExit(f"ERROR: activate GLRP and fill GOAL.md and UNIT.md: {exc}") from exc
+    numbers = [line.split(".", 1)[0] for line in goal]
+    if not goal or len(numbers) != len(set(numbers)) or not units or any(unit not in goal for unit in units):
+        raise SystemExit("ERROR: GOAL.md needs unique numbered steps; UNIT.md must copy the exact goal lines being closed")
+    return units
 
 
 def main() -> None:
@@ -45,11 +38,13 @@ def main() -> None:
     args = p.parse_args()
     root, how = resolve_root(args.cwd)
     assert_safe(root, how, allow_non_git=how != "git")
+    units = unit_summaries(root)
     code = run_check(root)
     if code != 0:
         print("check failed — unit not closed", file=sys.stderr)
         raise SystemExit(10)
-    for summary in unit_summaries(root):
+    record_completed(root, units)
+    for summary in units:
         append_progress(root, f"closed unit: {summary}")
     print("Unit closed.")
     leftover = remaining_product_lines(root)

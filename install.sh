@@ -4,21 +4,46 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 SRC="$ROOT/skill"
-if [[ ! -f "$SRC/SKILL.md" ]]; then
-  echo "error: missing $SRC/SKILL.md" >&2
+for file in grok/SKILL.md hermes/SKILL.md grok/hooks/glrp-stop.json scripts/activate.py scripts/check.py scripts/close_unit.py scripts/glrp_lib.py scripts/next.py scripts/stop_gate.py; do
+  if [[ ! -f "$SRC/$file" ]]; then
+    echo "error: incomplete GLRP package; missing $SRC/$file" >&2
+    exit 1
+  fi
+done
+python3 -c 'import sys; assert sys.version_info >= (3, 10), "GLRP requires Python 3.10+"; import importlib; importlib.import_module("tomllib" if sys.version_info >= (3, 11) else "tomli")' || {
+  echo "error: use Python 3.11+, or on Python 3.10 run: python3 -m pip install tomli" >&2
   exit 1
-fi
+}
 
-install_one() {
+install_one() (
   local dest="$1"
   local wrapper="$2"
-  mkdir -p "$dest/scripts"
-  rm -f "$dest/scripts/"*.py
-  cp "$SRC/scripts/"*.py "$dest/scripts/"
-  chmod +x "$dest/scripts/"*.py
-  cp "$wrapper" "$dest/SKILL.md"
+  if [[ -L "$dest" || ( -e "$dest" && ! -d "$dest" ) ]]; then
+    echo "error: expected a regular skill directory at $dest" >&2
+    exit 1
+  fi
+  mkdir -p "$(dirname "$dest")"
+  staging="$(mktemp -d "$(dirname "$dest")/.glrp-install.XXXXXX")"
+  cleanup() {
+    status=$?
+    if [[ ! -e "$dest" && -d "$staging/previous" ]]; then
+      mv "$staging/previous" "$dest" || {
+        echo "error: previous installation retained at $staging/previous" >&2
+        exit 1
+      }
+    fi
+    rm -rf "$staging"
+    exit "$status"
+  }
+  trap cleanup EXIT
+  mkdir -p "$staging/new/scripts"
+  cp "$SRC/scripts/"*.py "$staging/new/scripts/"
+  chmod +x "$staging/new/scripts/"*.py
+  cp "$wrapper" "$staging/new/SKILL.md"
+  if [[ -d "$dest" ]]; then mv "$dest" "$staging/previous"; fi
+  mv "$staging/new" "$dest"
   echo "Installed: $dest"
-}
+)
 
 found=0
 default_grok_home=""

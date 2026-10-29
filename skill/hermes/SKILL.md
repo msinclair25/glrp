@@ -1,59 +1,47 @@
 ---
 name: glrp
-description: Keep Grok on one coding unit with a check.
-version: 0.1.5
-author: Morgan Sinclair (msinclair25), Hermes Agent
+description: Keep a numbered coding plan moving through verified steps. Use for "activate glrp" or /glrp, not one-off questions.
+version: 0.2.0
 license: MIT
-platforms: [linux, macos, windows]
-metadata:
-  hermes:
-    tags: [Grok, Coding, Skills]
-    related_skills: []
+platforms: [linux, macos]
 ---
 
 # GLRP
 
-Keep Grok on one software unit: re-read the job, edit, run the check, write progress.
+Use the current GLRP edition alone in a project; do not also activate the legacy long-running-project playbook.
 
-Do **not** load a playbook. Do **not** install the old `long-running-project` / GLRP-Skill activate in this repo at the same time.
+## Workflow
 
-## When to use
+Run commands from the user's project directory. Resolve its Git root first:
+`git rev-parse --show-toplevel`. Stop if it fails; never activate the home directory.
 
-User is doing agentic coding (feature, bug, refactor) and wants less drift, less amnesia, more accuracy. Triggers: "activate glrp", "activate long running", `/glrp`.
+1. Activate once:
+   ```bash
+   python3 "${HERMES_HOME:-$HOME/.hermes}/skills/glrp/scripts/activate.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+   Fill `.glrp/GOAL.md` with unique numbered product steps (`1. …`, `2. …`).
+   Keep exclusions unnumbered. Copy the exact current goal line into `.glrp/UNIT.md`.
+   Set `verify` in `.glrp/config.toml` to a real test command for that step.
+2. At each new session, read the handoff:
+   ```bash
+   python3 "${HERMES_HOME:-$HOME/.hermes}/skills/glrp/scripts/next.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+3. Implement the current unit. Keep changes scoped to that step. Do not rewrite the goal to match incomplete work.
+4. Verify and close in one command:
+   ```bash
+   python3 "${HERMES_HOME:-$HOME/.hermes}/skills/glrp/scripts/close_unit.py" --cwd "$(git rev-parse --show-toplevel)"
+   ```
+   This runs verification itself; no separate check is required. Failure never records completion.
+   For diagnostics without closing, use `check.py` from the same installed scripts directory.
+   If multiple steps were finished, put each exact goal line in UNIT before closing.
+5. On `KEEP GOING`, copy the next unfinished goal line into UNIT and continue this sitting.
+   Stop when every product step is verified, or when user input/authorization is needed.
+   On a failed check, fix the current unit; do not advance it.
+6. Before ending or compacting, leave UNIT describing the work to do next.
+   `completed.json` is maintained by the close command; never edit it to bypass verification.
+   `progress.txt` is a human-readable history, not completion authority.
 
-Don't use for one-off questions.
 
-## Procedure
+## Upgrade note
 
-Do these in order. Scripts live beside this file (`scripts/`). If installed to `~/.hermes/skills/glrp/`, use that path.
-
-1. **Root.** `git rev-parse --show-toplevel`. If that fails, stop. Never activate `$HOME`.
-2. **Activate (once).**  
-   `terminal(command="python3 scripts/activate.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   If the user dumped a long brief, write **product** work into `.glrp/GOAL.md` as a numbered list. If the brief contradicts itself, keep the later correction. Do-not-build is an unnumbered list — not units.  
-   Set `verify` to a command that can fail **for this unit**.
-3. **Re-anchor (every session, first).**  
-   `terminal(command="python3 scripts/next.py --cwd \"$(git rev-parse --show-toplevel)\"")`
-4. **One unit at a time.** `UNIT.md` is work to do **now**. Never write “do not implement yet.” Do not dump the whole GOAL in one edit.
-5. **Check.**  
-   `terminal(command="python3 scripts/check.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   If `verify` still points at a previous slice, change it. Exit `10` → stay on this unit.
-6. **Close.** Only when check is `0`:  
-   `terminal(command="python3 scripts/close_unit.py --cwd \"$(git rev-parse --show-toplevel)\"")`  
-   Immediately set `UNIT.md` to the lowest product GOAL number not yet in progress.txt. If this sitting finished several numbers, list all of them before close. If UNIT is already implemented, close and advance. Do-not-build is never a unit.  
-   If `close_unit.py` prints `KEEP GOING`, do that next unit **now**. Do not stop and wait for a new chat.
-7. **Before compact / new / end.** Progress must be appended. Next session starts at step 3.
-
-## Pitfalls
-
-- Never put “do not implement yet” in `UNIT.md`.
-- A sitting that ships 1–3 must close 1, 2, and 3.
-- After a green close, do the next number now.
-- Do-not-build is not a unit.
-- `verify = "true"` is refused once GOAL is numbered.
-- Do not rewrite `GOAL.md` to match what you built.
-- Do not stack the old GLRP-Skill playbook.
-
-## Verification
-
-- `.glrp/` files exist. Failed check appends `verify failed`. `next.py` reprints the current unit.
+Older text-log completions remain in progress.txt, but must be verified and closed once to populate completed.json. Review the existing work before re-closing; do not rebuild it merely because it lacks a new completion record.

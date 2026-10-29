@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from glrp_lib import GLRP_DIR, assert_safe, resolve_root  # noqa: E402
+from glrp_lib import GLRP_DIR, assert_safe, remaining_product_lines, resolve_root  # noqa: E402
 
 
 def tail_lines(text: str, n: int = 20) -> str:
@@ -37,6 +37,8 @@ def main() -> None:
     print()
     print("=== PROGRESS (tail) ===")
     print(tail_lines(progress) or "(empty)")
+    print("\n=== UNFINISHED GOAL STEPS ===")
+    print("\n".join(remaining_product_lines(root)) or "(no unfinished numbered steps; fill GOAL.md if still a template)")
 
 
 if __name__ == "__main__":

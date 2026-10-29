@@ -111,6 +111,8 @@ class TestCloseUnit(unittest.TestCase):
             git_init(root)
             self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
             (root / ".glrp" / "config.toml").write_text('verify = "false"\n', encoding="utf-8")
+            (root / ".glrp" / "GOAL.md").write_text("1. Add --tag.\n")
+            (root / ".glrp" / "UNIT.md").write_text("1. Add --tag.\n")
             proc = run_script("close_unit.py", "--cwd", str(root))
             self.assertEqual(proc.returncode, 10)
 
@@ -120,7 +122,9 @@ class TestCloseUnit(unittest.TestCase):
             git_init(root)
             self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
             (root / ".glrp" / "config.toml").write_text('verify = "true"\n', encoding="utf-8")
-            (root / ".glrp" / "UNIT.md").write_text("# Current unit\nAdd --tag.\n", encoding="utf-8")
+            (root / ".glrp" / "config.toml").write_text('verify = "echo checked"\n')
+            (root / ".glrp" / "GOAL.md").write_text("1. Add --tag.\n")
+            (root / ".glrp" / "UNIT.md").write_text("# Current unit\n1. Add --tag.\n", encoding="utf-8")
             proc = run_script("close_unit.py", "--cwd", str(root))
             self.assertEqual(proc.returncode, 0, proc.stderr)
             progress = (root / ".glrp" / "progress.txt").read_text(encoding="utf-8")
@@ -132,7 +136,8 @@ class TestCloseUnit(unittest.TestCase):
             root = Path(raw)
             git_init(root)
             self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
-            (root / ".glrp" / "config.toml").write_text('verify = "true"\n', encoding="utf-8")
+            (root / ".glrp" / "config.toml").write_text('verify = "echo checked"\n', encoding="utf-8")
+            (root / ".glrp" / "GOAL.md").write_text("1. person\n2. charge\n3. list\n")
             (root / ".glrp" / "UNIT.md").write_text(
                 "# Current unit\n1. person\n2. charge\n3. list\n",
                 encoding="utf-8",
@@ -149,7 +154,7 @@ class TestCloseUnit(unittest.TestCase):
             root = Path(raw)
             git_init(root)
             self.assertEqual(run_script("activate.py", "--cwd", str(root)).returncode, 0)
-            (root / ".glrp" / "config.toml").write_text('verify = ":"\n', encoding="utf-8")
+            (root / ".glrp" / "config.toml").write_text('verify = "echo checked"\n', encoding="utf-8")
             (root / ".glrp" / "GOAL.md").write_text(
                 "# Goal\n1. person\n2. charge\n3. list\n",
                 encoding="utf-8",
